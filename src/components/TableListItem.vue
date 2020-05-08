@@ -1,17 +1,26 @@
 <template>
   <div class="list-item">
-    <a class="list-item-btn" role="button" v-bind:class="{'active': selected,'open': showColumns }" @click="toggleColumns" @click.prevent="$emit('selected', table)">
-      <span class="btn-fab open-close" >
+    <a class="list-item-btn" role="button" :class="{'active': selected, 'open': showColumns }" @click="openTable">
+      <span class="btn-fab open-close" @click.prevent.stop="toggleColumns">
         <i class="dropdown-icon material-icons">keyboard_arrow_right</i>
       </span>
       <i v-if="table.entityType === 'table'" title="Table" class="table-icon item-icon material-icons">grid_on</i>
       <i v-if="table.entityType === 'view'" title="View" class="view-icon item-icon material-icons">grid_on</i>
       <span class="table-name truncate expand">{{table.name}}</span>
+
       <span class="actions" v-bind:class="{'pinned': pinned.includes(table)}">
-        <span class="btn-fab launch" title="Open in a new tab" @click.prevent="openTable"><i class="material-icons">launch</i></span>
-        <span v-if="!pinned.includes(table)" @click.prevent.stop="pin" class="btn-fab pin"><i class="bk-pin"></i></span>
-        <span v-if="pinned.includes(table)" @click.prevent.stop="unpin" class="btn-fab unpin"><i class="material-icons">clear</i></span>
-        <span v-if="pinned.includes(table)" class="btn-fab pinned"><i class="bk-pin"></i></span>
+        <span class="btn-fab launch" title="View columns" @click.prevent.stop="toggleColumns">
+          <i class="material-icons">web_asset</i>
+        </span>
+        <span v-if="!pinned.includes(table)" @click.prevent.stop="pin" class="btn-fab pin">
+          <i class="bk-pin"></i>
+        </span>
+        <span v-if="pinned.includes(table)" @click.prevent.stop="unpin" class="btn-fab unpin">
+          <i class="material-icons">clear</i>
+        </span>
+        <span v-if="pinned.includes(table)" class="btn-fab pinned">
+          <i class="bk-pin"></i>
+        </span>
       </span>
     </a>
     <div v-show="showColumns" class="sub-items">
@@ -55,11 +64,14 @@
       ...mapGetters(['pinned'])
     },
     methods: {
-      async toggleColumns() {
+      toggleColumns() {
         this.showColumns = !this.showColumns
+        this.$emit('selected', this.table)
       },
       openTable() {
-        this.$root.$emit("loadTable", this.table);
+        this.$root.$emit('loadTable', this.table)
+        this.toggleColumns()
+        this.$emit('selected', this.table)
       },
       pin() {
         this.$store.dispatch('pinTable', this.table)
